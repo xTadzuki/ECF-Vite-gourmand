@@ -1,0 +1,281 @@
+/* public/assets/css/style.css */
+
+/* ---------- Design tokens ---------- */
+:root{
+  --bg: #fbfaf7;            /* ivoire doux */
+  --surface: #ffffff;
+  --surface-2: rgba(255,255,255,.65);
+
+  --text: #1f1a17;
+  --muted: rgba(31,26,23,.65);
+
+  --burgundy: #7a1f2b;       /* accent traiteur */
+  --sage: #2f6b57;           /* accent secondaire */
+  --gold: #c9a24e;           /* accent doré (léger) */
+
+  --border: rgba(31,26,23,.10);
+
+  --shadow-sm: 0 10px 30px rgba(31,26,23,.06);
+  --shadow-md: 0 18px 50px rgba(31,26,23,.10);
+
+  --radius: 18px;
+}
+
+/* ---------- Base ---------- */
+*{ box-sizing: border-box; }
+html, body { height: 100%; }
+
+body{
+  background: radial-gradient(1200px 700px at 20% 0%, rgba(122,31,43,.08), transparent 55%),
+              radial-gradient(900px 600px at 90% 20%, rgba(47,107,87,.08), transparent 55%),
+              var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  line-height: 1.5;
+}
+
+a{ color: inherit; }
+a:hover{ color: inherit; opacity: .9; }
+
+.text-muted{ color: var(--muted) !important; }
+
+/* ---------- Layout helpers ---------- */
+.section{
+  margin-top: 22px;
+  margin-bottom: 22px;
+}
+
+.section-title{
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.section-subtitle{
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+
+/* ---------- Navbar ---------- */
+.navbar{
+  background: rgba(251,250,247,.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar .nav-link{
+  color: rgba(31,26,23,.78) !important;
+  border-radius: 12px;
+  padding: 8px 12px;
+}
+
+.navbar .nav-link.active{
+  background: rgba(122,31,43,.08);
+  color: var(--text) !important;
+  font-weight: 800;
+}
+
+.navbar .btn{
+  border-radius: 14px;
+}
+
+/* Brand (remplace les styles inline du header) */
+.brand-pill{
+  width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 950;
+  background: linear-gradient(135deg, rgba(122,31,43,.95), rgba(201,162,78,.85));
+  box-shadow: 0 10px 22px rgba(122,31,43,.18);
+}
+
+.brand-title{
+  display:block;
+  line-height:1;
+  font-weight:950;
+}
+
+.brand-subtitle{
+  display:block;
+  line-height:1.1;
+  font-size:12px;
+}
+
+/* ---------- Hero / Panels ---------- */
+.hero{
+  background: linear-gradient(180deg, rgba(255,255,255,.86), rgba(255,255,255,.72));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.hero h1{
+  font-weight: 950;
+  letter-spacing: -0.03em;
+}
+
+.hero-accent-burgundy{ color: var(--burgundy); }
+.hero-accent-sage{ color: var(--sage); }
+
+/* ---------- Hero points ---------- */
+.hero-points{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  color: rgba(31,26,23,.75);
+  font-weight: 600;
+}
+
+.hero-points span{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+}
+
+/* ---------- Buttons ---------- */
+.btn{
+  border-radius: 14px !important;
+  font-weight: 800;
+}
+
+.btn-primary{
+  background: var(--burgundy) !important;
+  border-color: var(--burgundy) !important;
+}
+
+.btn-primary:hover{
+  filter: brightness(.95);
+}
+
+.btn-dark{
+  background: #1f1a17 !important;
+  border-color: #1f1a17 !important;
+}
+
+.btn-outline-secondary{
+  border-color: rgba(31,26,23,.22) !important;
+  color: rgba(31,26,23,.80) !important;
+}
+
+.btn-outline-secondary:hover{
+  background: rgba(31,26,23,.06) !important;
+}
+
+/* ---------- Cards ---------- */
+.card{
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow: none !important;
+  background: rgba(255,255,255,.82);
+}
+
+.card .card-title{
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+/* Hover */
+.card:hover{
+  box-shadow: var(--shadow-sm) !important;
+  transform: translateY(-2px);
+  transition: .18s ease;
+}
+
+/* ✅ IMPORTANT : header carte menu (titre + badge) */
+.menu-card-head{
+  min-width: 0; /* permet l'ellipsis */
+}
+
+.menu-card-head .card-title{
+  min-width: 0;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Badges ---------- */
+.badge-soft{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-weight: 800;
+  color: rgba(31,26,23,.75);
+  background: rgba(31,26,23,.06);
+  border: 1px solid rgba(31,26,23,.09);
+}
+
+/* ✅ STOCK : toujours sur une seule ligne, jamais décalé */
+.badge-stock-ok,
+.badge-stock-low,
+.badge-stock-out{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;  /* <-- empêche retour à la ligne */
+  flex-shrink: 0;       /* <-- ne se compresse pas */
+  align-self: center;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 900;
+}
+
+.badge-stock-ok{
+  background: rgba(47,107,87,.10);
+  border: 1px solid rgba(47,107,87,.18);
+  color: rgba(47,107,87,.95);
+}
+
+.badge-stock-low{
+  background: rgba(201,162,78,.18);
+  border: 1px solid rgba(201,162,78,.30);
+  color: rgba(128,86,0,.92);
+}
+
+.badge-stock-out{
+  background: rgba(122,31,43,.12);
+  border: 1px solid rgba(122,31,43,.22);
+  color: rgba(122,31,43,.95);
+}
+
+/* ---------- Tables ---------- */
+.table{
+  --bs-table-bg: transparent;
+}
+
+.table thead th{
+  color: rgba(31,26,23,.70);
+  font-weight: 900;
+  border-bottom: 1px solid var(--border) !important;
+}
+
+.table td{
+  border-top: 1px solid rgba(31,26,23,.08) !important;
+}
+
+/* ---------- Footer ---------- */
+footer{
+  background: rgba(255,255,255,.70);
+  border-top: 1px solid var(--border);
+}
+
+.footer-link{
+  text-decoration: none;
+}
+
+.footer-link:hover{
+  text-decoration: underline;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 992px){
+  .hero{ padding: 18px; }
+  .navbar .nav-link{ padding: 10px 12px; }
+}
