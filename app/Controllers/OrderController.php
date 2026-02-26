@@ -2,9 +2,9 @@
 // app/Controllers/OrderController.php
 
 require_once BASE_PATH . '/app/Core/Route.php';
-require_once BASE_PATH . '/app/Models/Menu.php';
-require_once BASE_PATH . '/app/Models/Order.php';
-require_once BASE_PATH . '/app/Models/UserProfile.php';
+require_once BASE_PATH . '/app/models/Menu.php';
+require_once BASE_PATH . '/app/models/Order.php';
+require_once BASE_PATH . '/app/models/UserProfile.php';
 require_once BASE_PATH . '/app/Services/Mailer.php';
 require_once BASE_PATH . '/app/Services/Auth.php';
 
@@ -137,4 +137,6 @@ class OrderController
 }
         require_once BASE_PATH . '/app/Views/orders/create.php';
     }
+}
+
 }
