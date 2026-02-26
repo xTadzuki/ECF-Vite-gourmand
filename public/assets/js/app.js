@@ -17,13 +17,20 @@
   window.addEventListener("scroll", setNavState, { passive: true });
   setNavState();
 
+  // ------------------------------------------------------------
   // Animations au scroll (fade-up)
+  // ------------------------------------------------------------
   const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const autoTargets = [".hero", ".card", ".table-responsive", ".alert", "form"];
+
+  // Exclusions : évite le clignotement du meter (progress + règles)
+  const EXCLUDE = ["#pwdMeter", "#pwdMeter *", "#pwdBar", "#pwdBar *"];
+
   const targets = autoTargets
     .flatMap((sel) => $$(sel))
-    .filter((el) => !el.hasAttribute("data-no-anim"));
+    .filter((el) => !el.hasAttribute("data-no-anim"))
+    .filter((el) => !EXCLUDE.some((s) => el.matches(s)));
 
   if (!prefersReduced) {
     targets.forEach((el) => {
@@ -54,7 +61,7 @@
   // ------------------------------------------------------------
   const pwd = document.querySelector('input[name="password"]');
 
-  // On garde un flag global pour que le loader sache si c'est OK
+  // Flag global pour le loader
   let passwordIsStrong = true;
 
   if (pwd) {
@@ -109,14 +116,13 @@
         label.classList.toggle("text-muted", score !== 5);
       }
 
-      // important : retourne un booléen "ok"
       return checks.len && checks.up && checks.low && checks.num && checks.spec;
     }
 
     // Init + live
     passwordIsStrong = evaluate(pwd.value || "");
     pwd.addEventListener("input", (e) => {
-      passwordIsStrong = evaluate(e.target.value);
+      passwordIsStrong = evaluate(e.target.value || "");
     });
 
     // Bloquer submit si pas OK
@@ -135,19 +141,17 @@
 
   // ------------------------------------------------------------
   // Boutons loading sur submit (toutes les pages) - Evite double clic
-  // IMPORTANT : ne pas activer si le submit a été bloqué (preventDefault)
+  // IMPORTANT : ne pas activer si le submit a été bloqué
   // ------------------------------------------------------------
   $$("form").forEach((form) => {
     form.addEventListener("submit", (e) => {
-      // Si un autre handler a fait preventDefault (ex: mdp faible), on ne met pas le loader
-      if (e.defaultPrevented) return;
+      if (e.defaultPrevented) return; // un autre handler a bloqué
 
-      // Si formulaire inscription et mdp invalide (double sécurité)
+      // double sécurité sur la page register
       if (pwd && form.contains(pwd) && !passwordIsStrong) return;
 
       const btn = form.querySelector("button[type='submit']");
-      if (!btn) return;
-      if (btn.disabled) return;
+      if (!btn || btn.disabled) return;
 
       btn.dataset.originalText = btn.innerHTML;
       btn.disabled = true;
@@ -156,7 +160,6 @@
         Envoi...
       `;
 
-      // Sécurité: si la page ne navigue pas (validation HTML bloquée), on réactive au bout de 2s.
       setTimeout(() => {
         if (!document.body.contains(btn)) return;
         if (btn.disabled) {
@@ -167,22 +170,23 @@
     });
   });
 
+  // ------------------------------------------------------------
   // Compteur de menus
+  // ------------------------------------------------------------
   const menusCountEl = $("#menusCount");
   const menusList = $("#menusList");
 
   const refreshMenusCount = () => {
     if (!menusCountEl || !menusList) return;
-
-    // On compte les "cards" via les colonnes directes de menusList (col-*)
     const cols = menusList.querySelectorAll(":scope > [class*='col-']");
     const count = cols.length;
-
     menusCountEl.textContent = count ? `${count} menu${count > 1 ? "s" : ""}` : "";
   };
   refreshMenusCount();
 
+  // ------------------------------------------------------------
   // Debug: si le CSS ne charge pas
+  // ------------------------------------------------------------
   const cssOk = (() => {
     const test = document.createElement("div");
     test.style.position = "absolute";
