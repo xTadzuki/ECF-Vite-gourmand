@@ -33,6 +33,14 @@ final class Route
     public const EMPLOYEE_REVIEW_ACTION = 'employee_review_action';
 
     public const ADMIN = 'admin';
+    public const ADMIN_STATS_JSON = 'admin_stats_json';
+
+    public const ADMIN_MENUS = 'admin_menus';
+    public const ADMIN_MENU_CREATE = 'admin_menu_create';
+    public const ADMIN_MENU_STORE = 'admin_menu_store';
+    public const ADMIN_MENU_EDIT = 'admin_menu_edit';
+    public const ADMIN_MENU_UPDATE = 'admin_menu_update';
+    public const ADMIN_MENU_DELETE = 'admin_menu_delete';
     public const ADMIN_CREATE = 'admin_create';
     public const ADMIN_TOGGLE = 'admin_toggle';
 }
