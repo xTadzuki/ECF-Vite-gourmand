@@ -66,7 +66,6 @@ Les scripts sont fournis dans `sql/` :
 2) Importer `schema.sql`
 3) Importer `seed.sql`
 
-> Si tu vois “Aucun plat n’est associé…”, c’est que `seed.sql` n’a pas été importé correctement (ou la table de liaison `menu_dish` est vide).
 
 ---
 
