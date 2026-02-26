@@ -1,7 +1,7 @@
 <?php
 // app/Controllers/MenuController.php
 
-require_once BASE_PATH . '/app/Models/Menu.php';
+require_once BASE_PATH . '/app/models/Menu.php';
 
 class MenuController
 {
