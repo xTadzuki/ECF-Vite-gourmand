@@ -6,11 +6,13 @@ require_once BASE_PATH . '/app/Views/layouts/header.php';
 
 // Variables attendues : $menu (array|null), $images (array), $dishes (array)
 if (!isset($menu) || !$menu): ?>
-  <div class="hero mb-4">
-    <h1 class="mb-1">Menu introuvable</h1>
-    <p class="text-muted mb-0">Ce menu n’existe pas ou a été supprimé.</p>
-  </div>
-  <a class="btn btn-dark" href="?r=menus">← Retour aux menus</a>
+  <section class="vg-pagehead">
+    <div>
+      <h1 class="vg-h1">Menu introuvable</h1>
+      <p class="vg-muted mb-0">Ce menu n’existe pas ou a été supprimé.</p>
+    </div>
+    <a class="vg-btn vg-btn--ghost" href="?r=menus">← Retour aux menus</a>
+  </section>
   <?php
     require_once BASE_PATH . '/app/Views/layouts/footer.php';
     exit;
@@ -18,9 +20,9 @@ if (!isset($menu) || !$menu): ?>
 <?php endif; ?>
 
 <?php
-$stock    = (int)($menu['stock'] ?? 0);
-$price    = (float)($menu['price'] ?? 0);
-$maxPrice = isset($menu['max_price']) && $menu['max_price'] !== null ? (float)$menu['max_price'] : null;
+$stock     = (int)($menu['stock'] ?? 0);
+$price     = (float)($menu['price'] ?? 0);
+$maxPrice  = isset($menu['max_price']) && $menu['max_price'] !== null ? (float)$menu['max_price'] : null;
 $minPeople = (int)($menu['min_people'] ?? 0);
 
 function stock_badge_show(int $stock): array {
@@ -35,104 +37,50 @@ $images = $images ?? [];
 $dishes = $dishes ?? [];
 ?>
 
-<div class="hero mb-4">
-  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-    <div style="min-width: 260px; flex: 1;">
-      <div class="d-flex gap-2 flex-wrap mb-2">
-        <?php if (!empty($menu['theme'])): ?>
-          <span class="badge-soft">Thème : <?= htmlspecialchars($menu['theme']) ?></span>
-        <?php endif; ?>
-
-        <?php if (!empty($menu['diet'])): ?>
-          <span class="badge-soft">Régime : <?= htmlspecialchars($menu['diet']) ?></span>
-        <?php endif; ?>
-
-        <span class="badge-soft">Min : <?= $minPeople ?> pers.</span>
-        <span class="<?= $stockClass ?>"><?= htmlspecialchars($stockLabel) ?></span>
-      </div>
-
-      <h1 class="mb-1"><?= htmlspecialchars($menu['title'] ?? 'Menu') ?></h1>
-      <p class="text-muted mb-0">
-        <?= nl2br(htmlspecialchars($menu['description'] ?? '')) ?>
-      </p>
-    </div>
-
-    <div class="card" style="min-width: 280px;">
-      <div class="card-body">
-        <div class="text-muted small">À partir de</div>
-
-        <div style="font-weight:900; font-size: 22px;">
-          <?= number_format($price, 2, ',', ' ') ?> €
-          <span class="text-muted" style="font-weight:600; font-size: 14px;">/ pers.</span>
-        </div>
-
-        <?php if ($maxPrice !== null): ?>
-          <div class="text-muted small mt-1">
-            Option premium jusqu’à <strong><?= number_format($maxPrice, 2, ',', ' ') ?> €</strong>/pers.
-          </div>
-        <?php endif; ?>
-
-        <hr style="border-color: rgba(31,26,23,.10);">
-
-        <?php if ($stock <= 0): ?>
-          <div class="alert alert-warning mb-3">
-            Ce menu est temporairement indisponible.
-          </div>
-          <a class="btn btn-dark w-100" href="?r=menus">Retour</a>
-        <?php else: ?>
-          <!-- Si ta route est order_create dans ton router -->
-          <a class="btn btn-primary w-100"
-   href="<?= htmlspecialchars($_SERVER['SCRIPT_NAME']) ?>?r=order_create&menu_id=<?= (int)($menu['id'] ?? 0) ?>">
-  Commander ce menu
-</a>
-
-          <div class="text-muted small mt-2">
-            Stock restant : <strong><?= $stock ?></strong>
-          </div>
-        <?php endif; ?>
-      </div>
-    </div>
+<section class="vg-pagehead">
+  <div>
+    <h1 class="vg-h1"><?= htmlspecialchars($menu['title'] ?? 'Menu') ?></h1>
+    <p class="vg-muted mb-0"><?= nl2br(htmlspecialchars($menu['description'] ?? '')) ?></p>
   </div>
-</div>
+  <a class="vg-btn vg-btn--ghost" href="?r=menus">← Retour aux menus</a>
+</section>
 
-<!-- Galerie images -->
-<?php if (!empty($images)): ?>
-  <div class="card mb-4">
-    <div class="card-body">
-      <h4 class="mb-3">Photos</h4>
-      <div class="row g-3">
+<div class="vg-menu-detail">
+
+  <!-- Contenu -->
+  <section class="vg-surface vg-panel">
+    <div class="d-flex gap-2 flex-wrap mb-2">
+      <?php if (!empty($menu['theme'])): ?>
+        <span class="vg-badge"><?= htmlspecialchars($menu['theme']) ?></span>
+      <?php endif; ?>
+
+      <?php if (!empty($menu['diet'])): ?>
+        <span class="vg-badge"><?= htmlspecialchars($menu['diet']) ?></span>
+      <?php endif; ?>
+
+      <span class="vg-badge">Min <?= $minPeople ?> pers.</span>
+      <span class="<?= $stockClass ?>"><?= htmlspecialchars($stockLabel) ?></span>
+    </div>
+
+    <?php if (!empty($images)): ?>
+      <div class="vg-gallery" aria-label="Galerie photos">
         <?php foreach ($images as $img): ?>
-          <div class="col-12 col-sm-6 col-lg-4">
-            <div class="card h-100">
-              <img
-                src="<?= htmlspecialchars($img['image_path'] ?? '') ?>"
-                alt="<?= htmlspecialchars($img['alt_text'] ?? 'Image menu') ?>"
-                class="rounded-4"
-                style="width:100%; height:220px; object-fit:cover;"
-              >
-            </div>
-          </div>
+          <img
+            class="vg-gallery__img"
+            src="<?= htmlspecialchars($img['image_path'] ?? '') ?>"
+            alt="<?= htmlspecialchars($img['alt_text'] ?? 'Image menu') ?>"
+          >
         <?php endforeach; ?>
       </div>
-    </div>
-  </div>
-<?php endif; ?>
+      <div class="vg-divider"></div>
+    <?php endif; ?>
 
-<!-- Plats + allergènes -->
-<div class="card mb-4">
-  <div class="card-body">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-      <h4 class="mb-0">Composition du menu</h4>
-      <a class="btn btn-dark btn-sm" href="?r=menus">← Retour aux menus</a>
-    </div>
+    <h2 class="vg-h2">Composition du menu</h2>
 
     <?php if (empty($dishes)): ?>
-      <div class="alert alert-info mb-0">
-        Aucun plat n’est associé à ce menu (données de démo à compléter).
-      </div>
+      <p class="vg-muted mb-0">Aucun plat n’est associé à ce menu (données de démo à compléter).</p>
     <?php else: ?>
       <?php
-      // Groupement entrée / plat / dessert
       $groups = ['entrée' => [], 'plat' => [], 'dessert' => []];
       foreach ($dishes as $dish) {
         $type = $dish['type'] ?? 'plat';
@@ -144,41 +92,53 @@ $dishes = $dishes ?? [];
       <?php foreach ($groups as $type => $items): ?>
         <?php if (empty($items)) continue; ?>
 
-        <h5 class="mt-3 mb-2 text-uppercase" style="letter-spacing:.08em; font-weight:900;">
-          <?= htmlspecialchars($type) ?>
-        </h5>
+        <h3 class="vg-kicker" style="margin-top:14px;">
+          <?= htmlspecialchars(strtoupper($type)) ?>
+        </h3>
 
-        <div class="row g-3">
+        <ul class="vg-list">
           <?php foreach ($items as $dish): ?>
-            <div class="col-12 col-md-6">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="d-flex justify-content-between align-items-start gap-2">
-                    <div>
-                      <div style="font-weight:850;"><?= htmlspecialchars($dish['name'] ?? '') ?></div>
-                      <div class="text-muted small">Plat associé au menu</div>
-                    </div>
-                    <span class="badge-soft"><?= htmlspecialchars($type) ?></span>
-                  </div>
-
-                  <?php if (!empty($dish['allergens'])): ?>
-                    <div class="mt-3 d-flex flex-wrap gap-2">
-                      <?php foreach ($dish['allergens'] as $allergen): ?>
-                        <span class="badge-soft">⚠ <?= htmlspecialchars($allergen) ?></span>
-                      <?php endforeach; ?>
-                    </div>
-                  <?php else: ?>
-                    <div class="text-muted small mt-3">Aucun allergène renseigné.</div>
-                  <?php endif; ?>
+            <li>
+              <strong><?= htmlspecialchars($dish['name'] ?? '') ?></strong>
+              <?php if (!empty($dish['allergens'])): ?>
+                <div class="vg-muted" style="font-size:13px; margin-top:4px;">
+                  Allergènes : <?= htmlspecialchars(implode(', ', $dish['allergens'])) ?>
                 </div>
-              </div>
-            </div>
+              <?php endif; ?>
+            </li>
           <?php endforeach; ?>
-        </div>
-
+        </ul>
       <?php endforeach; ?>
     <?php endif; ?>
-  </div>
+  </section>
+
+  <!-- Commander -->
+  <aside class="vg-surface vg-panel vg-order">
+    <h2 class="vg-h2">Commander</h2>
+    <div class="vg-divider"></div>
+
+    <div class="vg-muted small">Prix par personne</div>
+    <div class="vg-order__price"><?= number_format($price, 2, ',', ' ') ?> €</div>
+
+    <?php if ($maxPrice !== null): ?>
+      <div class="vg-muted" style="font-size:13px; margin-top:6px;">
+        Option premium jusqu’à <strong><?= number_format($maxPrice, 2, ',', ' ') ?> €</strong>/pers.
+      </div>
+    <?php endif; ?>
+
+    <div class="vg-divider"></div>
+
+    <?php if ($stock <= 0): ?>
+      <div class="alert alert-warning mb-3">Ce menu est temporairement indisponible.</div>
+      <a class="vg-btn vg-btn--primary" href="?r=menus" style="width:100%; height:44px;">Retour aux menus</a>
+    <?php else: ?>
+      <a class="vg-btn vg-btn--primary" href="?r=order_create&menu_id=<?= (int)($menu['id'] ?? 0) ?>" style="width:100%; height:44px;">
+        Valider
+      </a>
+      <div class="vg-muted" style="font-size:13px; margin-top:10px;">Stock restant : <strong><?= $stock ?></strong></div>
+    <?php endif; ?>
+  </aside>
+
 </div>
 
 <?php require_once BASE_PATH . '/app/Views/layouts/footer.php'; ?>
