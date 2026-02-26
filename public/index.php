@@ -3,9 +3,15 @@
 declare(strict_types=1);
 require_once BASE_PATH . '/vendor/autoload.php';
 
-// BASE_PATH
+// BASE_PATH 
 if (!defined('BASE_PATH')) {
     define('BASE_PATH', dirname(__DIR__));
+}
+
+// Autoload Composer (MongoDB Client, etc.)
+$autoload = BASE_PATH . '/vendor/autoload.php';
+if (file_exists($autoload)) {
+    require_once $autoload;
 }
 
 /*
