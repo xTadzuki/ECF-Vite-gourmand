@@ -36,7 +36,7 @@ class UserController
 
         $history = Order::getStatusHistory($orderId);
 
-        // ✅ permet d'afficher les boutons "modifier/annuler" dans la view
+        // permet d'afficher les boutons "modifier/annuler" dans la view
         $canEdit = Order::canUserEdit($order);
 
         require_once BASE_PATH . '/app/Views/user/order_show.php';
@@ -71,7 +71,7 @@ class UserController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-            // ✅ Dans ton schéma : ville + distance (pas event_address)
+            // ville + distance (pas event_address)
             $city = trim($_POST['city'] ?? '');
             $km   = (float)($_POST['km'] ?? 0);
 
@@ -82,9 +82,7 @@ class UserController
             if ($city === '') $errors[] = "Ville obligatoire.";
             if ($eventDate === '') $errors[] = "Date obligatoire.";
             if ($eventTime === '') $errors[] = "Heure obligatoire.";
-
-            // ⚠️ on ne peut pas recalculer min_people ici si tu ne le joins pas dans findByIdForUser
-            // donc on met juste une règle de base :
+            
             if ($peopleCount <= 0) $errors[] = "Nombre de personnes invalide.";
 
             if (empty($errors)) {
