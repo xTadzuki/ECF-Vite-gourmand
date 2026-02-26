@@ -86,7 +86,7 @@ class MongoService
                 ['upsert' => true]
             );
         } catch (\Throwable $e) {
-            // Mongo installé mais service non lancé / erreur réseau : on ignore pour ne pas bloquer l'app
+            // Mongo installé mais service non lancé / erreur réseau : ignore pour ne pas bloquer l'app
             return;
         }
     }
