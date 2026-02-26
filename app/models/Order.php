@@ -1,12 +1,12 @@
 <?php
 // app/Models/Order.php
 
-require_once BASE_PATH . '/app/Models/Database.php';
+require_once BASE_PATH . '/app/models/Database.php';
 
 class Order
 {
     /**
-     * Création d'une commande (alignée sur ton schema.sql)
+     * Création d'une commande
      */
     public static function create(array $data): int
     {
@@ -43,10 +43,10 @@ class Order
 
         return (int)$pdo->lastInsertId();
     }
-public static function history(int $orderId): array
-{
-    return self::getStatusHistory($orderId);
-}
+    public static function history(int $orderId): array
+    {
+        return self::getStatusHistory($orderId);
+    }
 
     /**
      * Historique des statuts
@@ -86,7 +86,6 @@ public static function history(int $orderId): array
 
     /**
      * Liste des commandes d'un utilisateur
-     * (corrige ton erreur: Order::listByUser() manquante)
      */
     public static function listByUser(int $userId): array
     {
@@ -159,74 +158,74 @@ public static function history(int $orderId): array
 
         return $stmt->fetchAll();
     }
-/**
- * L'utilisateur peut modifier/annuler uniquement si la commande est "créée"
- */
-public static function canUserEdit(array $order): bool
-{
-    return (($order['status'] ?? '') === 'créée');
-}
-
-/**
- * Mise à jour d'une commande par son propriétaire (si modifiable)
- */
-public static function updateByUser(int $orderId, int $userId, array $data): bool
-{
-    $pdo = Database::getConnection();
-
-    // On autorise uniquement ces champs
-    $allowed = ['delivery_city', 'delivery_distance', 'event_date', 'event_time', 'people_count'];
-    $set = [];
-    $params = ['id' => $orderId, 'user_id' => $userId];
-
-    foreach ($allowed as $field) {
-        if (array_key_exists($field, $data)) {
-            $set[] = "$field = :$field";
-            $params[$field] = $data[$field];
-        }
+    /**
+     * L'utilisateur peut modifier/annuler uniquement si la commande est "créée"
+     */
+    public static function canUserEdit(array $order): bool
+    {
+        return (($order['status'] ?? '') === 'créée');
     }
 
-    if (empty($set)) return false;
+    /**
+     * Mise à jour d'une commande par son propriétaire (si modifiable)
+     */
+    public static function updateByUser(int $orderId, int $userId, array $data): bool
+    {
+        $pdo = Database::getConnection();
 
-    // Sécurité: on n'update que si status = 'créée'
-    $sql = "
+        // On autorise uniquement ces champs
+        $allowed = ['delivery_city', 'delivery_distance', 'event_date', 'event_time', 'people_count'];
+        $set = [];
+        $params = ['id' => $orderId, 'user_id' => $userId];
+
+        foreach ($allowed as $field) {
+            if (array_key_exists($field, $data)) {
+                $set[] = "$field = :$field";
+                $params[$field] = $data[$field];
+            }
+        }
+
+        if (empty($set)) return false;
+
+        // Sécurité: n'update que si status = 'créée'
+        $sql = "
         UPDATE orders
         SET " . implode(', ', $set) . ", updated_at = NOW()
         WHERE id = :id AND user_id = :user_id AND status = 'créée'
     ";
 
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
 
-    return $stmt->rowCount() > 0;
-}
+        return $stmt->rowCount() > 0;
+    }
 
-/**
- * Annulation par l'utilisateur (si modifiable)
- */
-public static function cancelByUser(int $orderId, int $userId): bool
-{
-    $pdo = Database::getConnection();
+    /**
+     * Annulation par l'utilisateur (si modifiable)
+     */
+    public static function cancelByUser(int $orderId, int $userId): bool
+    {
+        $pdo = Database::getConnection();
 
-    $stmt = $pdo->prepare("
+        $stmt = $pdo->prepare("
         UPDATE orders
         SET status = 'annulée',
             cancelled_at = NOW(),
             updated_at = NOW()
         WHERE id = :id AND user_id = :user_id AND status = 'créée'
     ");
-    $stmt->execute([
-        'id' => $orderId,
-        'user_id' => $userId
-    ]);
+        $stmt->execute([
+            'id' => $orderId,
+            'user_id' => $userId
+        ]);
 
-    if ($stmt->rowCount() > 0) {
-        self::addStatusHistory($orderId, 'annulée');
-        return true;
+        if ($stmt->rowCount() > 0) {
+            self::addStatusHistory($orderId, 'annulée');
+            return true;
+        }
+
+        return false;
     }
-
-    return false;
-}
 
     // =========================================================
     // ESPACE EMPLOYÉ / ADMIN
@@ -318,5 +317,52 @@ public static function cancelByUser(int $orderId, int $userId): bool
         ]);
 
         self::addStatusHistory($orderId, 'annulée');
+    }
+
+
+
+    // --- STATS (DAL) 
+
+    public static function statsOrdersByStatus(): array
+    {
+        $pdo = Database::getConnection();
+        $stmt = $pdo->query("
+            SELECT status, COUNT(*) AS total
+            FROM orders
+            GROUP BY status
+            ORDER BY total DESC
+        ");
+        return $stmt->fetchAll() ?: [];
+    }
+
+    public static function statsRevenueByMonth(int $months = 12): array
+    {
+        $months = max(1, min(24, $months));
+        $pdo = Database::getConnection();
+        $stmt = $pdo->prepare("
+            SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym, SUM(total_price) AS revenue, COUNT(*) AS orders_count
+            FROM orders
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL :m MONTH)
+            GROUP BY ym
+            ORDER BY ym ASC
+        ");
+        $stmt->bindValue(':m', $months, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll() ?: [];
+    }
+
+    public static function statsTopMenus(int $limit = 5): array
+    {
+        $limit = max(1, min(20, $limit));
+        $pdo = Database::getConnection();
+        $sql = "
+            SELECT m.id, m.title, COUNT(o.id) AS orders_count
+            FROM orders o
+            INNER JOIN menus m ON m.id = o.menu_id
+            GROUP BY m.id, m.title
+            ORDER BY orders_count DESC
+            LIMIT {$limit}
+        ";
+        return $pdo->query($sql)->fetchAll() ?: [];
     }
 }
