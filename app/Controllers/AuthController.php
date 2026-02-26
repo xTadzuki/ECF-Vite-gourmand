@@ -1,7 +1,7 @@
 <?php
 // app/Controllers/AuthController.php
 require_once BASE_PATH . '/app/Core/Route.php';
-require_once BASE_PATH . '/app/Models/User.php';
+require_once BASE_PATH . '/app/models/User.php';
 require_once BASE_PATH . '/app/Services/Mailer.php';
 
 
@@ -63,7 +63,7 @@ class AuthController
                     'password'  => $hash
                 ]);
 
-                // Connexion auto après inscription (simple)
+                // Connexion auto après inscription 
                 $_SESSION['user_id'] = $userId;
                 $_SESSION['role'] = 'user';
                 $mailer = new Mailer('log'); 
@@ -139,3 +139,4 @@ class AuthController
         exit;
     }
 }
+
