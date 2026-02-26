@@ -1,7 +1,7 @@
 <?php
 // app/Controllers/HomeController.php
 
-require_once BASE_PATH . '/app/Models/Database.php';
+require_once __DIR__ . '/../models/Database.php';
 
 class HomeController
 {
@@ -9,19 +9,41 @@ class HomeController
     {
         $pdo = Database::getConnection();
 
-        // 3 menus "à la une" (les plus récents)
+        // Menus "à la une"
         $stmt = $pdo->query("
             SELECT m.id, m.title, m.description, m.price, m.min_people, m.stock,
-                   t.name AS theme, d.name AS diet
+                   t.name AS theme, d.name AS diet,
+                   (SELECT mi.image_path
+                    FROM menu_images mi
+                    WHERE mi.menu_id = m.id
+                    ORDER BY mi.sort_order ASC, mi.id ASC
+                    LIMIT 1) AS thumb
             FROM menus m
             LEFT JOIN themes t ON t.id = m.theme_id
             LEFT JOIN diets d ON d.id = m.diet_id
             ORDER BY m.created_at DESC
-            LIMIT 3
+            LIMIT 6
         ");
         $featuredMenus = $stmt->fetchAll() ?: [];
 
-        // Avis validés (max 3)
+        // Menus  — derniers menus
+        $stmtMenus = $pdo->query("
+            SELECT m.id, m.title, m.description, m.price, m.min_people, m.stock,
+                   t.name AS theme, d.name AS diet,
+                   (SELECT mi.image_path
+                    FROM menu_images mi
+                    WHERE mi.menu_id = m.id
+                    ORDER BY mi.sort_order ASC, mi.id ASC
+                    LIMIT 1) AS thumb
+            FROM menus m
+            LEFT JOIN themes t ON t.id = m.theme_id
+            LEFT JOIN diets d ON d.id = m.diet_id
+            ORDER BY m.created_at DESC
+            LIMIT 12
+        ");
+        $menus = $stmtMenus->fetchAll() ?: [];
+
+        // Avis validés 
         $reviews = [];
         try {
             $stmt2 = $pdo->query("
@@ -29,7 +51,7 @@ class HomeController
                 FROM reviews r
                 WHERE r.is_validated = 1
                 ORDER BY r.created_at DESC
-                LIMIT 3
+                LIMIT 10
             ");
             $reviews = $stmt2->fetchAll() ?: [];
         } catch (Throwable $e) {
