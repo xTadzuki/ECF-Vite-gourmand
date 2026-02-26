@@ -11,50 +11,27 @@ function stock_badge(int $stock): array {
 }
 ?>
 
-<div class="hero mb-4">
-  <div class="d-flex flex-wrap justify-content-between align-items-end gap-2">
-    <div>
-      <h1 class="mb-1">Tous les menus</h1>
-      <p class="text-muted mb-0">Filtre en temps réel, consulte les détails et commande en ligne.</p>
-    </div>
-    <div class="text-muted small">
-      <span id="menusCount"></span>
-    </div>
+<section class="vg-pagehead">
+  <div>
+    <h1 class="vg-h1">Menus</h1>
+    <p class="vg-muted mb-0">Filtre en temps réel, consulte les détails et commande en ligne.</p>
   </div>
-</div>
+  <div class="vg-muted small"><span id="menusCount"></span></div>
+</section>
 
-<!-- Bloc filtres -->
-<div class="card mb-4">
-  <div class="card-body">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-      <h4 class="mb-0">Filtres</h4>
-      <span class="text-muted small">Combine les filtres pour affiner</span>
+<div class="vg-menus-layout">
+
+  <!-- Filtres (sidebar) -->
+  <aside class="vg-surface vg-filters">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h2 class="vg-h2">Filtres</h2>
+      <button id="filtersReset" class="vg-btn vg-btn--ghost" type="button">Réinitialiser</button>
     </div>
 
-    <form id="filtersForm" class="row g-3" aria-label="Filtres des menus">
-      <div class="col-md-3">
-        <label class="form-label" for="price_max">Prix max</label>
-        <input class="form-control" type="number" step="0.01" id="price_max" name="price_max" placeholder="ex: 250">
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label" for="price_min">Prix min</label>
-        <input class="form-control" type="number" step="0.01" id="price_min" name="price_min" placeholder="ex: 100">
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label" for="price_max_range">Prix max (fourchette)</label>
-        <input class="form-control" type="number" step="0.01" id="price_max_range" name="price_max_range" placeholder="ex: 400">
-      </div>
-
-      <div class="col-md-3">
-        <label class="form-label" for="min_people">Nb personnes minimum</label>
-        <input class="form-control" type="number" id="min_people" name="min_people" placeholder="ex: 10">
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label" for="theme_id">Thème</label>
-        <select class="form-select" id="theme_id" name="theme_id">
+    <form id="filtersForm" aria-label="Filtres des menus">
+      <div class="vg-field">
+        <label for="theme_id">Thème</label>
+        <select id="theme_id" name="theme_id">
           <option value="">Tous</option>
           <option value="1">Noël</option>
           <option value="2">Pâques</option>
@@ -62,9 +39,9 @@ function stock_badge(int $stock): array {
         </select>
       </div>
 
-      <div class="col-md-6">
-        <label class="form-label" for="diet_id">Régime</label>
-        <select class="form-select" id="diet_id" name="diet_id">
+      <div class="vg-field">
+        <label for="diet_id">Régime</label>
+        <select id="diet_id" name="diet_id">
           <option value="">Tous</option>
           <option value="1">Classique</option>
           <option value="2">Végétarien</option>
@@ -72,73 +49,86 @@ function stock_badge(int $stock): array {
         </select>
       </div>
 
-      <div class="col-12 d-flex flex-wrap gap-2">
-        <button class="btn btn-primary" type="submit">Appliquer</button>
-        <button class="btn btn-dark" type="button" id="resetFilters">Réinitialiser</button>
+      <div class="vg-field">
+        <label for="min_people">Convives (min)</label>
+        <input type="number" id="min_people" name="min_people" placeholder="ex: 10">
+      </div>
+
+      <div class="vg-field">
+        <label for="price_min">Prix min</label>
+        <input type="number" step="0.01" id="price_min" name="price_min" placeholder="ex: 100">
+      </div>
+
+      <div class="vg-field">
+        <label for="price_max">Prix max</label>
+        <input type="number" step="0.01" id="price_max" name="price_max" placeholder="ex: 250">
+      </div>
+
+      <div class="vg-field">
+        <label for="price_max_range">Prix max (fourchette)</label>
+        <input type="number" step="0.01" id="price_max_range" name="price_max_range" placeholder="ex: 400">
       </div>
     </form>
-  </div>
-</div>
+  </aside>
 
-<!-- Liste des menus -->
-<div class="row g-3" id="menusList">
-  <?php if (empty($menus)): ?>
-    <div class="col-12">
-      <p class="text-muted mb-0">Aucun menu disponible.</p>
-    </div>
-  <?php else: ?>
-    <?php foreach ($menus as $menu): ?>
-      <?php
-        $id = (int)($menu['id'] ?? 0);
-        $stock = (int)($menu['stock'] ?? 0);
-        [$stockClass, $stockLabel] = stock_badge($stock);
-      ?>
+  <!-- Liste -->
+  <section class="vg-surface vg-menus-panel">
+    <div id="menusList" class="vg-menu-list">
+      <?php if (empty($menus)): ?>
+        <p class="vg-muted mb-0">Aucun menu disponible.</p>
+      <?php else: ?>
+        <?php foreach ($menus as $menu): ?>
+          <?php
+            $id = (int)($menu['id'] ?? 0);
+            $stock = (int)($menu['stock'] ?? 0);
+            $thumb = (string)($menu['thumb'] ?? '');
+            [$stockClass, $stockLabel] = stock_badge($stock);
+          ?>
 
-      <div class="col-12 col-md-6 col-lg-4">
-        <div class="card h-100">
-          <div class="card-body d-flex flex-column">
-
-            <div class="menu-card-head d-flex justify-content-between align-items-center gap-2 mb-2">
-              <h5 class="card-title mb-0"><?= htmlspecialchars($menu['title'] ?? '') ?></h5>
-              <span class="<?= $stockClass ?>"><?= htmlspecialchars($stockLabel) ?></span>
-            </div>
-
-            <div class="d-flex flex-wrap gap-2 mb-3">
-              <span class="badge-soft">Thème : <?= htmlspecialchars($menu['theme'] ?? '—') ?></span>
-              <span class="badge-soft">Régime : <?= htmlspecialchars($menu['diet'] ?? '—') ?></span>
-              <span class="badge-soft">Min : <?= (int)($menu['min_people'] ?? 0) ?> pers.</span>
-            </div>
-
-            <p class="text-muted mb-3" style="min-height:3.6em;">
-              <?= nl2br(htmlspecialchars(mb_strimwidth($menu['description'] ?? '', 0, 140, '…'))) ?>
-            </p>
-
-            <div class="mt-auto d-flex justify-content-between align-items-center">
-              <div>
-                <div class="text-muted small">À partir de</div>
-                <div style="font-weight:900; font-size: 18px;">
-                  <?= number_format((float)($menu['price'] ?? 0), 2, ',', ' ') ?> €
-                </div>
-              </div>
-
-              <?php if ($id > 0): ?>
-                <a class="btn btn-outline-dark" href="?r=menu_show&id=<?= $id ?>">Détails</a>
+          <article class="vg-menu-card">
+            <div class="vg-menu-card__media">
+              <?php if ($thumb !== ''): ?>
+                <img class="vg-menu-card__img" src="<?= htmlspecialchars($thumb) ?>" alt="<?= htmlspecialchars($menu['title'] ?? 'Menu') ?>">
               <?php else: ?>
-                <span class="text-muted small">ID manquant</span>
+                <div class="vg-menu-card__ph" aria-hidden="true">🍽️</div>
               <?php endif; ?>
             </div>
 
-            <?php if ($stock <= 0): ?>
-              <div class="alert alert-warning mt-3 mb-0">
-                Ce menu n’est plus disponible pour le moment.
+            <div class="vg-menu-card__body">
+              <div class="vg-menu-card__top">
+                <h3 class="vg-menu-card__title"><?= htmlspecialchars($menu['title'] ?? '') ?></h3>
+                <span class="<?= $stockClass ?>"><?= htmlspecialchars($stockLabel) ?></span>
               </div>
-            <?php endif; ?>
 
-          </div>
-        </div>
-      </div>
-    <?php endforeach; ?>
-  <?php endif; ?>
+              <div class="vg-menu-card__meta">
+                <span class="vg-badge"><?= htmlspecialchars($menu['theme'] ?? '—') ?></span>
+                <span class="vg-badge"><?= htmlspecialchars($menu['diet'] ?? '—') ?></span>
+                <span class="vg-badge">Min <?= (int)($menu['min_people'] ?? 0) ?> pers.</span>
+              </div>
+
+              <p class="vg-menu-card__desc"><?= htmlspecialchars(mb_strimwidth((string)($menu['description'] ?? ''), 0, 160, '…')) ?></p>
+            </div>
+
+            <div class="vg-menu-card__cta">
+              <div class="vg-price">
+                <div class="vg-muted small">À partir de</div>
+                <div class="vg-price__value"><?= number_format((float)($menu['price'] ?? 0), 2, ',', ' ') ?> €</div>
+              </div>
+
+              <?php if ($id > 0): ?>
+                <a class="vg-btn vg-btn--primary" href="?r=menu_show&id=<?= $id ?>">Voir détails</a>
+              <?php else: ?>
+                <span class="vg-muted small">ID manquant</span>
+              <?php endif; ?>
+            </div>
+          </article>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
+  </section>
+
 </div>
+
+<script src="assets/js/menus-filters.js" defer></script>
 
 <?php require_once BASE_PATH . '/app/Views/layouts/footer.php'; ?>
