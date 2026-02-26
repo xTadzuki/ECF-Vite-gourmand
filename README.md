@@ -1,171 +1,128 @@
-# ECF-Vite-gourmand
-Projet ECF – Titre professionnel
-Ce document décrit la démarche à suivre pour installer et lancer l’application **Vite & Gourmand** en local sur un environnement Windows avec XAMPP.
+# Vite Gourmand — ECF (Traiteur événementiel)
+
+Vite Gourmand est une application web de traiteur événementiel : l’utilisateur peut parcourir des menus, filtrer rapidement selon ses besoins (budget, thème, régime…), consulter le détail d’un menu (plats + allergènes), et passer commande.  
+Côté administration, l’application propose un tableau de bord avec statistiques, ainsi qu’une gestion des menus (création / édition / suppression).
+
+Ce projet a été réalisé dans le cadre de l’ECF afin de démontrer : base de données SQL, composants d’accès aux données (DAL), composants métier, interface responsive, DOM + requêtes asynchrones, et documentation de déploiement.
 
 ---
 
-## 1. Prérequis
+## Fonctionnalités
 
-- Système : **Windows**
-- **XAMPP** (Apache + MySQL/MariaDB)
-- Navigateur web (Chrome, Firefox…)
-- (Optionnel) **MongoDB** si les statistiques admin sont utilisées
+### Côté utilisateur
+- Liste des menus
+- Filtrage **dynamique** (sans rechargement) via requête asynchrone
+- Détail d’un menu : plats associés + allergènes
+- Interface responsive (desktop / tablette / mobile)
 
----
-
-## 2. Installation du projet
-
-1. Copier le dossier du projet dans le répertoire :
-C:\xampp\htdocs\
-
-2. L’arborescence attendue est :
-C:\xampp\htdocs\vite-gourmand\
+### Côté admin
+- Dashboard avec graphiques (statistiques)
+- CRUD Menus (create / edit / delete)
+- Données de démo complètes (menus, plats, allergènes, avis)
 
 ---
 
-## 3. Démarrage des services
-
-1. Ouvrir **XAMPP Control Panel**
-2. Démarrer les services :
-- **Apache**
-- **MySQL**
-
----
-
-## 4. Base de données MySQL
-
-### 4.1 Création de la base
-1. Accéder à phpMyAdmin :
-http://localhost/phpmyadmin
-2. Créer une base de données :
-- Nom : `vite_gourmand`
-- Interclassement : `utf8mb4_general_ci`
-
-### 4.2 Import du schéma
-1. Sélectionner la base `vite_gourmand`
-2. Onglet **Importer**
-3. Importer le fichier :
-schema.sql
-
-### 4.3 Import des données de démonstration
-1. Onglet **Importer**
-2. Importer le fichier :
-seed.sql
+## Stack technique
+- **Back-end** : PHP (architecture MVC)
+- **Base de données** : MySQL
+- **Front-end** : HTML / CSS / JavaScript
+- **Asynchrone** : `fetch()` + endpoint JSON
+- **Graphiques** : Chart.js (CDN)
+- **Environnement local** : XAMPP (Apache + MySQL)
 
 ---
 
-## 5. Configuration de la connexion MySQL
-
-Vérifier le fichier :
-app/Models/Database.php
-
-Configuration par défaut sous XAMPP :
-- Hôte : `127.0.0.1`
-- Base : `vite_gourmand`
-- Utilisateur : `root`
-- Mot de passe : *(vide)*
+## Architecture du projet (repères)
+- `public/` : point d’entrée (front controller), assets (CSS/JS/images)
+- `app/Controllers/` : contrôleurs (logique de routes + orchestration)
+- `app/Models/` : DAL / accès aux données (PDO, requêtes préparées)
+- `app/Views/` : vues (pages)
+- `sql/` : scripts SQL (`schema.sql`, `seed.sql`)
+- `docs/` : documentation (UML, déploiement, maquettes)
 
 ---
 
-## 6. Lancement de l’application
+## Fonction “dynamique” (preuve ECF)
+Le filtrage des menus est géré **sans recharger la page** :
+1) le front déclenche un `fetch()` sur un endpoint JSON  
+2) la réponse est rendue en DOM (réécriture de la liste)
 
-L’application est accessible via Apache à l’URL suivante :
-http://localhost/vite-gourmand/public/
+- Endpoint : `/?r=menus_json` (retour JSON)
+- Script front : `public/assets/js/...` (fetch + render)
 
-Exemples de routes :
-- Accueil :
-http://localhost/vite-gourmand/public/?r=home
-- Menus :
-http://localhost/vite-gourmand/public/?r=menus
-
----
-
-## 7. Comptes et tests
-
-### 7.1 Inscription
-http://localhost/vite-gourmand/public/?r=register
-
-### 7.2 Connexion
-http://localhost/vite-gourmand/public/?r=login
-
-Les comptes de test (utilisateur, employé, admin) sont fournis dans le fichier `seed.sql`.
+Pour vérifier :
+- ouvrir DevTools → **Network**
+- modifier un filtre → voir la requête JSON en 200 + réponse JSON
 
 ---
 
-## 8. MongoDB (optionnel)
+## Base de données (SQL)
+Les scripts sont fournis dans `sql/` :
+- `schema.sql` : création des tables
+- `seed.sql` : jeu de données de démonstration (menus, plats, allergènes, avis, etc.)
 
-Certaines fonctionnalités statistiques (espace admin) utilisent MongoDB.
+### Import (phpMyAdmin)
+1) Créer la base : `vite_gourmand`
+2) Importer `schema.sql`
+3) Importer `seed.sql`
 
-### 8.1 Installation MongoDB
-- Installer **MongoDB Community Server**
-- Démarrer le service MongoDB
-
-### 8.2 Extension PHP MongoDB
-1. Copier `php_mongodb.dll` dans :
-C:\xampp\php\ext\
-2. Activer l’extension dans :
-C:\xampp\php\php.ini
-Ajouter :
-extension=mongodb
-3. Redémarrer Apache
-
-### 8.3 Désactivation de MongoDB (si non utilisé)
-Si MongoDB n’est pas disponible, les appels peuvent être neutralisés dans `MongoService` afin d’éviter toute erreur.
+> Si tu vois “Aucun plat n’est associé…”, c’est que `seed.sql` n’a pas été importé correctement (ou la table de liaison `menu_dish` est vide).
 
 ---
 
-## 9. Problèmes courants
-
-### Page XAMPP au lieu du site
-- Toujours accéder au site via :
-http://localhost/vite-gourmand/public/
-- Éviter les liens commençant par `/` dans les vues.
-- Utiliser uniquement des liens relatifs :
-- `?r=menus`
-- `?r=menu_show&id=1`
-
-### Base inconnue
-- Vérifier que la base `vite_gourmand` existe
-- Vérifier l’import de `schema.sql`
-
-### Menu introuvable
-- Vérifier que l’URL contient bien un `id`
-- Vérifier que la table `menus` contient des données
-
-### Erreur BASE_PATH
-- `BASE_PATH` doit être défini une seule fois, dans `public/index.php`
+## Installation en local (XAMPP)
+1) Placer le projet dans `htdocs/`  
+2) Démarrer Apache + MySQL depuis XAMPP  
+3) Importer `schema.sql` puis `seed.sql` dans la base `vite_gourmand`  
+4) Accéder au site :
+- `http://localhost/vite-gourmand/public/`
 
 ---
 
-## 10. Structure du projet
+## Accès de démonstration
+Comptes créés par le seed :
 
-vite-gourmand/
-├─ app/
-│ ├─ Controllers/
-│ ├─ Models/
-│ ├─ Services/
-│ ├─ Views/
-│ │ ├─ layouts/
-│ │ ├─ menus/
-│ │ └─ ...
-├─ public/
-│ ├─ assets/
-│ │ ├─ css/
-│ │ ├─ js/
-│ │ └─ images/
-│ └─ index.php
-├─ schema.sql
-└─ seed.sql
+- Utilisateur : `user@test.fr` / `Password!123`
+- Employé : `employee@test.fr` / `Password!123`
+- Admin : `admin@test.fr` / `Password!123`
 
 ---
 
-## 11. Accès rapides
-
-- phpMyAdmin :
-http://localhost/phpmyadmin
-- Application :
-http://localhost/vite-gourmand/public/
+## UML & Maquettes
+- UML (Use case / Classes / Sequence) : `docs/uml/`
+- Maquettes (exports PNG ou lien Figma) : `docs/mockups/`
 
 ---
 
-© Vite & Gourmand — Déploiement local
+## Déploiement
+Application déployée : **(mettre ici l’URL)**  
+Procédure détaillée : `docs/deployment.md`
+
+Checklist post-déploiement (recommandée) :
+- Accueil OK
+- Liste menus OK
+- Filtre async OK (Network 200 JSON)
+- Détail menu OK (plats + allergènes)
+- Admin dashboard OK (graphiques)
+
+---
+
+## Choix techniques (résumé)
+- Utilisation de **requêtes préparées PDO** pour sécuriser les requêtes avec paramètres
+- Mise en place d’une couche DAL (Models) pour centraliser le SQL
+- Front dynamique via `fetch()` + rendu DOM
+- Design tokens CSS (`--vg-*`) pour garder une charte cohérente et maintenir le responsive
+
+---
+
+## Axes d’amélioration (si plus de temps)
+- Authentification renforcée (RBAC plus strict, CSRF si formulaires critiques)
+- Pagination côté menus + cache côté API JSON
+- Tests (unitaires sur la DAL et tests fonctionnels de routes)
+- Gestion complète des uploads (images menus) + validation avancée
+- Logs applicatifs et monitoring
+
+---
+
+## Licence
+Projet pédagogique réalisé dans le cadre d’une évaluation (ECF).
