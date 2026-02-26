@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+require_once BASE_PATH . '/vendor/autoload.php';
 
 // BASE_PATH
 if (!defined('BASE_PATH')) {
@@ -159,6 +161,34 @@ switch ($route) {
 
     case Route::ADMIN_TOGGLE:
         (new AdminController())->toggleEmployee();
+        break;
+
+    case Route::ADMIN_STATS_JSON:
+        (new AdminController())->statsJson();
+        break;
+
+    case Route::ADMIN_MENUS:
+        (new AdminController())->menus();
+        break;
+
+    case Route::ADMIN_MENU_CREATE:
+        (new AdminController())->menuCreate();
+        break;
+
+    case Route::ADMIN_MENU_STORE:
+        (new AdminController())->menuStore();
+        break;
+
+    case Route::ADMIN_MENU_EDIT:
+        (new AdminController())->menuEdit();
+        break;
+
+    case Route::ADMIN_MENU_UPDATE:
+        (new AdminController())->menuUpdate();
+        break;
+
+    case Route::ADMIN_MENU_DELETE:
+        (new AdminController())->menuDelete();
         break;
 
     default:
