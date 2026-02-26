@@ -2,8 +2,8 @@
 // app/Controllers/EmployeeController.php
 require_once BASE_PATH . '/app/Core/Route.php';
 require_once BASE_PATH . '/app/Services/Auth.php';
-require_once BASE_PATH . '/app/Models/Order.php';
-require_once BASE_PATH . '/app/Models/Review.php';
+require_once BASE_PATH . '/app/models/Order.php';
+require_once BASE_PATH . '/app/models/Review.php';
 require_once BASE_PATH . '/app/Services/Mailer.php';
 require_once BASE_PATH . '/app/Core/OrderStatus.php';
 
