@@ -11,6 +11,11 @@ $base = htmlspecialchars($_SERVER['SCRIPT_NAME']); // ex: /vite-gourmand/public/
 
 <h1 class="mb-3">Espace Administrateur</h1>
 
+<div class="d-flex flex-wrap gap-2 mb-4">
+  <a class="btn btn-dark" href="<?= $base ?>?r=<?= Route::ADMIN_MENUS ?>">Gérer les menus</a>
+  <a class="btn btn-outline-dark" href="<?= $base ?>?r=<?= Route::ADMIN ?>">Dashboard</a>
+</div>
+
 <div class="card mb-4">
   <div class="card-body">
     <h4 class="mb-3">Créer un employé</h4>
@@ -75,36 +80,39 @@ $base = htmlspecialchars($_SERVER['SCRIPT_NAME']); // ex: /vite-gourmand/public/
   </div>
 </div>
 
+
 <div class="card mb-4">
   <div class="card-body">
-    <h4 class="mb-3">Statistiques (MongoDB)</h4>
+    <h4 class="mb-3">Statistiques</h4>
 
-    <?php if (empty($stats)): ?>
-      <div class="alert alert-warning mb-0">
-        Aucune statistique disponible (MongoDB non installé, non lancé ou collection vide).
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="p-3 border rounded-3 bg-light-subtle">
+          <div class="fw-semibold mb-2">Commandes par statut</div>
+          <canvas id="chartOrdersByStatus" height="140"></canvas>
+        </div>
       </div>
-    <?php else: ?>
-      <canvas id="statsChart" height="120"></canvas>
-    <?php endif; ?>
+
+      <div class="col-12 col-lg-6">
+        <div class="p-3 border rounded-3 bg-light-subtle">
+          <div class="fw-semibold mb-2">Chiffre d’affaires (12 mois)</div>
+          <canvas id="chartRevenueByMonth" height="140"></canvas>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="p-3 border rounded-3 bg-light-subtle">
+          <div class="fw-semibold mb-2">Top menus (par commandes)</div>
+          <canvas id="chartTopMenus" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-muted small mt-3 mb-0" id="statsStatus">Chargement…</p>
   </div>
 </div>
 
-<?php if (!empty($stats)): ?>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-  const data = <?= json_encode($stats, JSON_UNESCAPED_UNICODE) ?>;
-
-  new Chart(document.getElementById('statsChart'), {
-    type: 'bar',
-    data: {
-      labels: data.map(d => d.menu_title ?? ''),
-      datasets: [{
-        label: 'Commandes',
-        data: data.map(d => d.orders_count ?? 0)
-      }]
-    }
-  });
-  </script>
-<?php endif; ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="assets/js/admin-dashboard.js" defer></script>
 
 <?php require_once BASE_PATH . '/app/Views/layouts/footer.php'; ?>
