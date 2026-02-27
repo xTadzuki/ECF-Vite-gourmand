@@ -4,7 +4,7 @@ require_once BASE_PATH . '/app/Core/Route.php';
 require_once BASE_PATH . '/app/Services/Auth.php';
 
 /**
- * Compat Linux 
+ * Compat Linux
  */
 $modelsDir = BASE_PATH . '/app/models';
 if (!is_dir($modelsDir)) {
@@ -76,8 +76,12 @@ class AdminController
     public function menus(): void
     {
         Auth::requireRole(['admin']);
-
         $menus = Menu::all();
+
+        $header = BASE_PATH . '/app/Views/layouts/header.php';
+        $footer = BASE_PATH . '/app/Views/layouts/footer.php';
+        if (!file_exists($header)) $header = BASE_PATH . '/app/views/layouts/header.php';
+        if (!file_exists($footer)) $footer = BASE_PATH . '/app/views/layouts/footer.php';
 
         $view = BASE_PATH . '/app/Views/admin/menus/index.php';
         if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/index.php';
@@ -88,7 +92,9 @@ class AdminController
             return;
         }
 
-        require_once $view;
+        require_once $header;
+        require $view;
+        require_once $footer;
     }
 
     public function menuCreate(): void
@@ -108,9 +114,17 @@ class AdminController
         $themes = Menu::themes();
         $diets  = Menu::diets();
 
+        $header = BASE_PATH . '/app/Views/layouts/header.php';
+        $footer = BASE_PATH . '/app/Views/layouts/footer.php';
+        if (!file_exists($header)) $header = BASE_PATH . '/app/views/layouts/header.php';
+        if (!file_exists($footer)) $footer = BASE_PATH . '/app/views/layouts/footer.php';
+
         $view = BASE_PATH . '/app/Views/admin/menus/create.php';
         if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/create.php';
-        require_once $view;
+
+        require_once $header;
+        require $view;
+        require_once $footer;
     }
 
     public function menuStore(): void
@@ -150,9 +164,17 @@ class AdminController
         $themes = Menu::themes();
         $diets  = Menu::diets();
 
+        $header = BASE_PATH . '/app/Views/layouts/header.php';
+        $footer = BASE_PATH . '/app/Views/layouts/footer.php';
+        if (!file_exists($header)) $header = BASE_PATH . '/app/views/layouts/header.php';
+        if (!file_exists($footer)) $footer = BASE_PATH . '/app/views/layouts/footer.php';
+
         $view = BASE_PATH . '/app/Views/admin/menus/edit.php';
         if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/edit.php';
-        require_once $view;
+
+        require_once $header;
+        require $view;
+        require_once $footer;
     }
 
     public function menuUpdate(): void
@@ -209,4 +231,3 @@ class AdminController
         ];
     }
 }
-
