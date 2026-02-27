@@ -4,7 +4,7 @@ require_once BASE_PATH . '/app/Core/Route.php';
 require_once BASE_PATH . '/app/Services/Auth.php';
 
 /**
- * Compat Linux : selon ton repo, le dossier peut être app/models ou app/Models
+ * Compat Linux 
  */
 $modelsDir = BASE_PATH . '/app/models';
 if (!is_dir($modelsDir)) {
