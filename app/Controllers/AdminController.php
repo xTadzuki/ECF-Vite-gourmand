@@ -2,9 +2,19 @@
 // app/Controllers/AdminController.php
 require_once BASE_PATH . '/app/Core/Route.php';
 require_once BASE_PATH . '/app/Services/Auth.php';
-require_once BASE_PATH . '/app/models/Admin.php';
-require_once BASE_PATH . '/app/models/Menu.php';
-require_once BASE_PATH . '/app/models/Order.php';
+
+/**
+ * Compat Linux 
+ */
+$modelsDir = BASE_PATH . '/app/models';
+if (!is_dir($modelsDir)) {
+    $modelsDir = BASE_PATH . '/app/Models';
+}
+
+require_once $modelsDir . '/Admin.php';
+require_once $modelsDir . '/Menu.php';
+require_once $modelsDir . '/Order.php';
+
 require_once BASE_PATH . '/app/Services/MongoService.php';
 
 class AdminController
@@ -16,7 +26,9 @@ class AdminController
         $employees = Admin::listEmployees();
         $stats = MongoService::all();
 
-        require_once BASE_PATH . '/app/Views/admin/dashboard.php';
+        $view = BASE_PATH . '/app/Views/admin/dashboard.php';
+        if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/dashboard.php';
+        require_once $view;
     }
 
     public function createEmployee(): void
@@ -27,33 +39,30 @@ class AdminController
             Admin::createEmployee($_POST['email'], $_POST['password']);
         }
         header('Location: ?r=' . Route::ADMIN);
-exit;
+        exit;
     }
 
     public function toggleEmployee(): void
     {
         Auth::requireRole(['admin']);
-        Admin::toggleEmployee((int)$_POST['id']);
-       header('Location: ?r=' . Route::ADMIN);
-exit;
+        Admin::toggleEmployee((int)($_POST['id'] ?? 0));
+        header('Location: ?r=' . Route::ADMIN);
+        exit;
     }
-
 
     public function statsJson(): void
     {
         Auth::requireRole(['admin']);
-
         header('Content-Type: application/json; charset=utf-8');
 
         $ordersByStatus = Order::statsOrdersByStatus();
         $revenueByMonth = Order::statsRevenueByMonth(12);
         $topMenus       = Order::statsTopMenus(6);
 
-        // Mongo (si disponible) — on garde en bonus
         $mongo = MongoService::all();
 
         echo json_encode([
-            'success' => true,
+            'success'        => true,
             'ordersByStatus' => $ordersByStatus,
             'revenueByMonth' => $revenueByMonth,
             'topMenus'       => $topMenus,
@@ -62,30 +71,46 @@ exit;
         exit;
     }
 
-    // --- MENUS CRUD 
+    // --- MENUS CRUD
 
     public function menus(): void
     {
         Auth::requireRole(['admin']);
+
         $menus = Menu::all();
-        require_once BASE_PATH . '/app/Views/admin/menus/index.php';
+
+        $view = BASE_PATH . '/app/Views/admin/menus/index.php';
+        if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/index.php';
+
+        if (!file_exists($view)) {
+            http_response_code(500);
+            echo "Vue introuvable (admin menus). Vérifie la casse du dossier Views/views.";
+            return;
+        }
+
+        require_once $view;
     }
 
     public function menuCreate(): void
     {
         Auth::requireRole(['admin']);
+
         $menu = [
-            'title' => '',
+            'title'       => '',
             'description' => '',
-            'min_people' => 1,
-            'price' => 0,
-            'stock' => 0,
-            'theme_id' => null,
-            'diet_id' => null,
+            'min_people'  => 1,
+            'price'       => 0,
+            'stock'       => 0,
+            'theme_id'    => null,
+            'diet_id'     => null,
         ];
+
         $themes = Menu::themes();
         $diets  = Menu::diets();
-        require_once BASE_PATH . '/app/Views/admin/menus/create.php';
+
+        $view = BASE_PATH . '/app/Views/admin/menus/create.php';
+        if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/create.php';
+        require_once $view;
     }
 
     public function menuStore(): void
@@ -108,7 +133,7 @@ exit;
     {
         Auth::requireRole(['admin']);
 
-        $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $id = (int)($_GET['id'] ?? 0);
         if ($id <= 0) {
             http_response_code(400);
             echo "ID invalide";
@@ -125,7 +150,9 @@ exit;
         $themes = Menu::themes();
         $diets  = Menu::diets();
 
-        require_once BASE_PATH . '/app/Views/admin/menus/edit.php';
+        $view = BASE_PATH . '/app/Views/admin/menus/edit.php';
+        if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/edit.php';
+        require_once $view;
     }
 
     public function menuUpdate(): void
@@ -137,7 +164,7 @@ exit;
             exit;
         }
 
-        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $id = (int)($_POST['id'] ?? 0);
         if ($id <= 0) {
             http_response_code(400);
             echo "ID invalide";
@@ -160,7 +187,7 @@ exit;
             exit;
         }
 
-        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        $id = (int)($_POST['id'] ?? 0);
         if ($id > 0) {
             Menu::delete($id);
         }
@@ -172,14 +199,14 @@ exit;
     private function sanitizeMenuPost(array $post): array
     {
         return [
-            'title' => trim((string)($post['title'] ?? '')),
+            'title'       => trim((string)($post['title'] ?? '')),
             'description' => trim((string)($post['description'] ?? '')),
-            'min_people' => (int)($post['min_people'] ?? 1),
-            'price' => (float)($post['price'] ?? 0),
-            'stock' => (int)($post['stock'] ?? 0),
-            'theme_id' => $post['theme_id'] ?? null,
-            'diet_id'  => $post['diet_id'] ?? null,
+            'min_people'  => (int)($post['min_people'] ?? 1),
+            'price'       => (float)($post['price'] ?? 0),
+            'stock'       => (int)($post['stock'] ?? 0),
+            'theme_id'    => ($post['theme_id'] ?? '') !== '' ? (int)$post['theme_id'] : null,
+            'diet_id'     => ($post['diet_id'] ?? '') !== '' ? (int)$post['diet_id'] : null,
         ];
     }
-
 }
+
