@@ -2,12 +2,34 @@
 
 declare(strict_types=1);
 
-// BASE_PATH 
+/**
+ * DEBUG
+ * Mets à false en prod (Fly) si tu ne veux pas afficher les erreurs.
+ * Tu peux aussi gérer ça via variable d'environnement.
+ */
+if (!defined('APP_DEBUG')) {
+    define('APP_DEBUG', true);
+}
+
+if (APP_DEBUG) {
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+    error_reporting(E_ALL);
+} else {
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
+}
+
+/**
+ * BASE_PATH (doit être défini AVANT toute utilisation)
+ */
 if (!defined('BASE_PATH')) {
     define('BASE_PATH', dirname(__DIR__));
 }
 
-// Autoload Composer (MongoDB Client, etc.)
+/**
+ * Autoload Composer (MongoDB Client, etc.)
+ */
 $autoload = BASE_PATH . '/vendor/autoload.php';
 if (file_exists($autoload)) {
     require_once $autoload;
@@ -20,7 +42,17 @@ if (file_exists($autoload)) {
 */
 ini_set('session.cookie_httponly', '1');
 
-if (!empty($_SERVER['HTTPS'])) {
+/**
+ * IMPORTANT : secure cookie uniquement si HTTPS est réellement actif.
+ * Sur Fly/Docker, $_SERVER['HTTPS'] peut valoir "off" (non vide) -> piège.
+ */
+$isHttps = (
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (!empty($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
+    || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+);
+
+if ($isHttps) {
     ini_set('session.cookie_secure', '1');
 }
 
