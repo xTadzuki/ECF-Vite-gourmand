@@ -4,7 +4,7 @@ require_once BASE_PATH . '/app/Core/Route.php';
 require_once BASE_PATH . '/app/Services/Auth.php';
 
 /**
- * Compat Linux 
+ * Compat Linux : selon ton repo, le dossier peut être app/models ou app/Models
  */
 $modelsDir = BASE_PATH . '/app/models';
 if (!is_dir($modelsDir)) {
@@ -74,26 +74,52 @@ class AdminController
     // --- MENUS CRUD
 
     public function menus(): void
-{
-    Auth::requireRole(['admin']);
+    {
+        Auth::requireRole(['admin']);
 
-    try {
-        $menus = Menu::all();
-    } catch (\PDOException $e) {
-        http_response_code(500);
-        echo "Erreur BDD : " . htmlspecialchars($e->getMessage());
-        return;
+        // --- Diagnostic : affiche toujours quelque chose, même en cas d'erreur ---
+        $menus = [];
+        $dbError = null;
+
+        try {
+            $menus = Menu::all();
+        } catch (\Throwable $e) {
+            $dbError = $e->getMessage();
+        }
+
+        // Si erreur BDD : affiche un message clair AVANT tout layout
+        if ($dbError !== null) {
+            http_response_code(500);
+            require_once BASE_PATH . '/app/Views/layouts/header.php';
+            echo '<div class="container mt-4">';
+            echo '<div class="alert alert-danger">';
+            echo '<h4>Erreur de connexion à la base de données</h4>';
+            echo '<pre>' . htmlspecialchars($dbError) . '</pre>';
+            echo '<hr>';
+            echo '<p>Vérifie que les variables d\'environnement suivantes sont bien définies sur Fly.io :</p>';
+            echo '<ul>';
+            echo '<li><code>DB_HOST</code></li>';
+            echo '<li><code>DB_PORT</code></li>';
+            echo '<li><code>DB_NAME</code></li>';
+            echo '<li><code>DB_USER</code></li>';
+            echo '<li><code>DB_PASS</code></li>';
+            echo '</ul>';
+            echo '<p>Commande : <code>fly secrets set DB_HOST=... DB_NAME=... DB_USER=... DB_PASS=...</code></p>';
+            echo '</div></div>';
+            require_once BASE_PATH . '/app/Views/layouts/footer.php';
+            return;
+        }
+
+        $view = BASE_PATH . '/app/Views/admin/menus/index.php';
+
+        if (!file_exists($view)) {
+            http_response_code(500);
+            echo "Vue introuvable : " . htmlspecialchars($view);
+            return;
+        }
+
+        require_once $view;
     }
-
-    $view = BASE_PATH . '/app/Views/admin/menus/index.php';
-    if (!file_exists($view)) {
-        http_response_code(500);
-        echo "Vue introuvable.";
-        return;
-    }
-
-    require_once $view;
-}
 
     public function menuCreate(): void
     {
@@ -113,7 +139,7 @@ class AdminController
         $diets  = Menu::diets();
 
         $view = BASE_PATH . '/app/Views/admin/menus/create.php';
-        if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/create.php';
+        if (!file_exists($view)) $view = BASE_PATH . '/app/Views/admin/menus/create.php';
         require_once $view;
     }
 
@@ -155,7 +181,7 @@ class AdminController
         $diets  = Menu::diets();
 
         $view = BASE_PATH . '/app/Views/admin/menus/edit.php';
-        if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/edit.php';
+        if (!file_exists($view)) $view = BASE_PATH . '/app/Views/admin/menus/edit.php';
         require_once $view;
     }
 
