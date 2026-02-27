@@ -4,9 +4,17 @@ require_once BASE_PATH . '/app/Core/Route.php';
 require_once BASE_PATH . '/app/Views/layouts/header.php';
 
 $menus = $menus ?? [];
-$base = htmlspecialchars($_SERVER['SCRIPT_NAME']);
+
+/**
+ * Base URL robuste :
+ * - SCRIPT_NAME = "/index.php" sur Fly
+ * - dirname("/index.php") = "/"
+ */
+$root = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+if ($root === '') $root = '';
+$index = $root . '/index.php';
 ?>
-<link rel="stylesheet" href="assets/css/admin.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($root) ?>/assets/css/admin.css">
 
 <div class="ad-wrap">
   <div class="ad-head">
@@ -15,8 +23,8 @@ $base = htmlspecialchars($_SERVER['SCRIPT_NAME']);
       <p class="ad-sub">Créer, modifier et supprimer les menus affichés sur le site.</p>
     </div>
     <div class="ad-actions">
-      <a class="ad-btn ad-btn--primary" href="<?= $base ?>?r=<?= Route::ADMIN_MENU_CREATE ?>">+ Nouveau menu</a>
-      <a class="ad-btn" href="<?= $base ?>?r=<?= Route::ADMIN ?>">Dashboard</a>
+      <a class="ad-btn ad-btn--primary" href="<?= htmlspecialchars($index) ?>?r=<?= Route::ADMIN_MENU_CREATE ?>">+ Nouveau menu</a>
+      <a class="ad-btn" href="<?= htmlspecialchars($index) ?>?r=<?= Route::ADMIN ?>">Dashboard</a>
     </div>
   </div>
 
@@ -48,9 +56,9 @@ $base = htmlspecialchars($_SERVER['SCRIPT_NAME']);
                 <td><?= number_format((float)($m['price'] ?? 0), 2, ',', ' ') ?> €</td>
                 <td><?= (int)($m['stock'] ?? 0) ?></td>
                 <td class="text-end">
-                  <a class="btn btn-sm btn-outline-dark" href="<?= $base ?>?r=<?= Route::ADMIN_MENU_EDIT ?>&id=<?= (int)($m['id'] ?? 0) ?>">Éditer</a>
+                  <a class="btn btn-sm btn-outline-dark" href="<?= htmlspecialchars($index) ?>?r=<?= Route::ADMIN_MENU_EDIT ?>&id=<?= (int)($m['id'] ?? 0) ?>">Éditer</a>
 
-                  <form class="d-inline" method="post" action="<?= $base ?>?r=<?= Route::ADMIN_MENU_DELETE ?>" onsubmit="return confirm('Supprimer ce menu ?');">
+                  <form class="d-inline" method="post" action="<?= htmlspecialchars($index) ?>?r=<?= Route::ADMIN_MENU_DELETE ?>" onsubmit="return confirm('Supprimer ce menu ?');">
                     <input type="hidden" name="id" value="<?= (int)($m['id'] ?? 0) ?>">
                     <button class="btn btn-sm btn-outline-danger" type="submit">Supprimer</button>
                   </form>
