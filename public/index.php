@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 /**
  * DEBUG
- * Mets à false en prod (Fly) si tu ne veux pas afficher les erreurs.
- * Tu peux aussi gérer ça via variable d'environnement.
  */
 if (!defined('APP_DEBUG')) {
     define('APP_DEBUG', true);
@@ -21,7 +19,7 @@ if (APP_DEBUG) {
 }
 
 /**
- * BASE_PATH (doit être défini AVANT toute utilisation)
+ * BASE_PATH 
  */
 if (!defined('BASE_PATH')) {
     define('BASE_PATH', dirname(__DIR__));
@@ -42,10 +40,7 @@ if (file_exists($autoload)) {
 */
 ini_set('session.cookie_httponly', '1');
 
-/**
- * IMPORTANT : secure cookie uniquement si HTTPS est réellement actif.
- * Sur Fly/Docker, $_SERVER['HTTPS'] peut valoir "off" (non vide) -> piège.
- */
+
 $isHttps = (
     (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (!empty($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443)
