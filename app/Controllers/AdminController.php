@@ -118,7 +118,7 @@ class AdminController
             return;
         }
 
-        require_once $view;
+        require $view;
     }
 
     public function menuCreate(): void
@@ -140,7 +140,7 @@ class AdminController
 
         $view = BASE_PATH . '/app/Views/admin/menus/create.php';
         if (!file_exists($view)) $view = BASE_PATH . '/app/Views/admin/menus/create.php';
-        require_once $view;
+        require $view;
     }
 
     public function menuStore(): void
@@ -182,7 +182,7 @@ class AdminController
 
         $view = BASE_PATH . '/app/Views/admin/menus/edit.php';
         if (!file_exists($view)) $view = BASE_PATH . '/app/Views/admin/menus/edit.php';
-        require_once $view;
+        require $view;
     }
 
     public function menuUpdate(): void
