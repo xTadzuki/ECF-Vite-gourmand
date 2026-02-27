@@ -74,22 +74,26 @@ class AdminController
     // --- MENUS CRUD
 
     public function menus(): void
-    {
-        Auth::requireRole(['admin']);
+{
+    Auth::requireRole(['admin']);
 
+    try {
         $menus = Menu::all();
-
-        $view = BASE_PATH . '/app/Views/admin/menus/index.php';
-        if (!file_exists($view)) $view = BASE_PATH . '/app/views/admin/menus/index.php';
-
-        if (!file_exists($view)) {
-            http_response_code(500);
-            echo "Vue introuvable (admin menus). Vérifie la casse du dossier Views/views.";
-            return;
-        }
-
-        require_once $view;
+    } catch (\PDOException $e) {
+        http_response_code(500);
+        echo "Erreur BDD : " . htmlspecialchars($e->getMessage());
+        return;
     }
+
+    $view = BASE_PATH . '/app/Views/admin/menus/index.php';
+    if (!file_exists($view)) {
+        http_response_code(500);
+        echo "Vue introuvable.";
+        return;
+    }
+
+    require_once $view;
+}
 
     public function menuCreate(): void
     {
