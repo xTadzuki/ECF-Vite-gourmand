@@ -74,16 +74,52 @@ class AdminController
     // --- MENUS CRUD
 
     public function menus(): void
-{
-    Auth::requireRole(['admin']);
+    {
+        Auth::requireRole(['admin']);
 
-    try {
-        $menus = Menu::all();
-    } catch (\Throwable $e) {
+        // --- Diagnostic : affiche toujours quelque chose, même en cas d'erreur ---
         $menus = [];
-        error_log('AdminController::menus() - ' . $e->getMessage());
+        $dbError = null;
+
+        try {
+            $menus = Menu::all();
+        } catch (\Throwable $e) {
+            $dbError = $e->getMessage();
+        }
+
+        // Si erreur BDD : affiche un message clair AVANT tout layout
+        if ($dbError !== null) {
+            http_response_code(500);
+            require_once BASE_PATH . '/app/Views/layouts/header.php';
+            echo '<div class="container mt-4">';
+            echo '<div class="alert alert-danger">';
+            echo '<h4>Erreur de connexion à la base de données</h4>';
+            echo '<pre>' . htmlspecialchars($dbError) . '</pre>';
+            echo '<hr>';
+            echo '<p>Vérifie que les variables d\'environnement suivantes sont bien définies sur Fly.io :</p>';
+            echo '<ul>';
+            echo '<li><code>DB_HOST</code></li>';
+            echo '<li><code>DB_PORT</code></li>';
+            echo '<li><code>DB_NAME</code></li>';
+            echo '<li><code>DB_USER</code></li>';
+            echo '<li><code>DB_PASS</code></li>';
+            echo '</ul>';
+            echo '<p>Commande : <code>fly secrets set DB_HOST=... DB_NAME=... DB_USER=... DB_PASS=...</code></p>';
+            echo '</div></div>';
+            require_once BASE_PATH . '/app/Views/layouts/footer.php';
+            return;
+        }
+
+        $view = BASE_PATH . '/app/Views/admin/menus/index.php';
+
+        if (!file_exists($view)) {
+            http_response_code(500);
+            echo "Vue introuvable : " . htmlspecialchars($view);
+            return;
+        }
+
+        require_once $view;
     }
-}
 
     public function menuCreate(): void
     {
