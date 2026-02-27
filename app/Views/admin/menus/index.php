@@ -1,9 +1,9 @@
 <?php
 // app/Views/admin/menus/index.php
 require_once BASE_PATH . '/app/Core/Route.php';
-require_once BASE_PATH . '/app/Views/layouts/header.php';
+require BASE_PATH . '/app/Views/layouts/header.php';
 
-$menus = $menus ?? [];
+if (!isset($menus)) $menus = [];
 
 /**
  * Base URL robuste :
