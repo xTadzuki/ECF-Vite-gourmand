@@ -1,0 +1,99 @@
+Déploiement en ligne (Railway MySQL + Fly.io)
+
+Sommaire
+
+1. Base MySQL sur Railway
+2. Préparer l’app pour la prod
+3. Configurer Fly.io
+4. Déployer
+5. Problèmes courants
+
+1. Base MySQL sur Railway
+1.1 Créer la base
+
+Ouvrir Railway et créer un Project (ou réutiliser un existant).
+Ajouter un service MySQL.
+Dans Connect / Variables, relever :
+Host
+Port
+Database
+User
+Password
+
+1.2 Importer les scripts SQL
+
+Importer les fichiers du projet dans cet ordre :
+schema.sql
+seed.sql
+
+Après import, vérifier que les tables existent (par exemple avec SHOW TABLES;).
+
+2. Préparer l’app pour la prod
+
+Désactiver le mode debug
+Dans public/index.php, mettre :
+define('APP_DEBUG', false);
+
+3. Configurer Fly.io
+
+3.1 Pré-requis
+flyctl installé
+
+session ouverte :
+fly auth login
+
+3.2 Définir les variables de connexion MySQL (secrets)
+
+À la racine du projet :
+
+fly secrets set \
+  DB_HOST="HOST_RAILWAY" \
+  DB_PORT="3306" \
+  DB_NAME="DB_RAILWAY" \
+  DB_USER="USER_RAILWAY" \
+  DB_PASS="PASSWORD_RAILWAY" \
+  DB_CHARSET="utf8mb4"
+
+Vérifier que les secrets sont bien enregistrés :
+fly secrets list
+
+4. Déployer
+
+Depuis la racine du projet :
+fly deploy
+
+Commandes utiles pour vérifier :
+fly status
+fly logs
+
+5. Problèmes courants
+
+Connexion MySQL impossible (timeout / refused)
+Causes fréquentes :
+DB_HOST / DB_PORT incorrects
+identifiants Railway mal copiés
+port Railway différent de 3306
+
+À faire :
+comparer Railway ↔ Fly :
+fly secrets list
+
+lire l’erreur exacte :
+fly logs
+
+Site OK mais données absentes
+
+Cause fréquente :
+schema.sql ou seed.sql non importé (ou dans le mauvais ordre)
+
+À faire :
+rejouer schema.sql, puis seed.sql sur Railway
+
+ Erreurs PHP visibles en ligne
+
+Cause :
+APP_DEBUG resté à true
+
+À faire :
+passer APP_DEBUG à false, puis relancer :
+fly deploy
