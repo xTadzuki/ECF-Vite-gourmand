@@ -1,0 +1,205 @@
+# Documentation technique — Vite & Gourmand
+
+Application web de traiteur événementiel (DWWM)
+
+---
+
+## Sommaire
+- [1. Périmètre du projet](#1-périmètre-du-projet)
+- [2. Stack technique](#2-stack-technique)
+- [3. Environnement & installation](#3-environnement--installation)
+- [4. Architecture du projet](#4-architecture-du-projet)
+- [5. Base de données (MCD / logique)](#5-base-de-données-mcd--logique)
+- [6. Fonctionnalités et rôles](#6-fonctionnalités-et-rôles)
+- [7. Parcours “Passer une commande” (résumé)](#7-parcours-passer-une-commande-résumé)
+- [8. Services applicatifs](#8-services-applicatifs)
+- [9. Sécurité](#9-sécurité)
+- [10. Tests & validation](#10-tests--validation)
+- [11. Pistes d’évolution](#11-pistes-dévolution)
+
+---
+
+## 1) Périmètre du projet
+
+**Vite & Gourmand** est une application web destinée à un service de traiteur.  
+Elle couvre :
+
+- consultation des menus
+- création de compte / authentification
+- passage et suivi de commandes
+- back-office (suivi des commandes, statuts, supervision)
+
+Objectif côté technique : une base claire, maintenable, et suffisamment structurée pour évoluer.
+
+---
+
+## 2) Stack technique
+
+### Backend
+- **PHP** (application serveur)
+- **MySQL** (données métier : comptes, menus, commandes, avis…)
+- **MongoDB** *(optionnel)* : statistiques / agrégations
+
+### Frontend
+- **HTML / CSS / JavaScript**
+- **Bootstrap** (mise en page, composants, responsive)
+
+### Architecture
+- **MVC** (Models / Views / Controllers)  
+  Séparation entre accès aux données, logique applicative et rendu HTML.
+
+---
+
+## 3) Environnement & installation
+
+### Local (développement)
+- OS : **Windows**
+- Serveur : **XAMPP** (Apache + MySQL)
+- Navigateur : Chrome (ou équivalent)
+
+### Fichiers SQL
+- `schema.sql` : structure de la base
+- `seed.sql` : données de départ (jeu de test)
+
+---
+
+## 4) Architecture du projet
+
+### Organisation des dossiers
+```text
+vite-gourmand/
+├─ app/
+│  ├─ Controllers/
+│  ├─ Models/
+│  ├─ Services/
+│  ├─ Core/
+│  └─ Views/
+│     ├─ layouts/
+│     ├─ menus/
+│     ├─ orders/
+│     └─ ...
+├─ public/
+│  ├─ assets/
+│  │  ├─ css/
+│  │  ├─ js/
+│  │  └─ images/
+│  └─ index.php
+├─ schema.sql
+└─ seed.sql
+### Point d’entrée et routage
+- Le serveur web expose **uniquement** le dossier `public/`.
+- Le routage est centralisé dans : `public/index.php`.
+
+---
+
+## 5) Base de données (MCD / logique)
+
+### Entités principales
+- `users`, `roles`
+- `menus`, `themes`, `diets`
+- `orders`, `order_statuses`, `order_status_history`
+- `dishes`, `allergens`
+- `reviews`
+
+### Relations (résumé)
+- Un `user` possède un `role`
+- Un `menu` est associé à un `theme` et un `diet`
+- Une `order` appartient à un `user` et référence un `menu`
+- Une `order` évolue via un historique de statuts
+- Un `menu` est composé de plusieurs `dishes` *(relation n-n)*
+- Un `dish` peut contenir plusieurs `allergens` *(relation n-n)*
+
+### Choix de modélisation
+- Statuts normalisés dans `order_statuses` et historisés dans `order_status_history`
+- Relations n-n via tables de liaison *(ex : `menu_dish`, `dish_allergen`)*
+- Pas de redondance volontaire *(clés primaires / étrangères systématiques)*
+
+---
+
+## 6) Fonctionnalités et rôles
+
+### Acteurs
+- **Visiteur**
+- **Client**
+- **Employé**
+- **Administrateur**
+
+### Visiteur
+- consulter les menus
+- afficher le détail d’un menu
+
+### Client
+- créer un compte / se connecter
+- passer une commande
+- suivre ses commandes
+- modifier ses informations
+
+### Employé
+- consulter les commandes
+- modifier le statut d’une commande
+- annuler une commande
+- gérer les avis
+
+### Administrateur
+- gérer les employés
+- consulter les statistiques *(si module activé)*
+- superviser l’application
+
+---
+
+## 7) Parcours “Passer une commande” (résumé)
+
+1. Le client se connecte.
+2. Il sélectionne un menu.
+3. Il renseigne les informations nécessaires (date / quantité / adresse selon formulaire).
+4. L’application :
+   - valide les données
+   - calcule le prix
+   - enregistre la commande
+   - initialise le statut *(et son historique)*
+5. La commande apparaît côté employé.
+
+> Le détail dépend des champs présents dans `orders` et des règles métier associées.
+
+---
+
+## 8) Services applicatifs
+
+Le projet isole certaines responsabilités dans des services :
+
+- **Auth** : session, vérification des rôles, protection des routes
+- **Mailer** : envoi d’emails *(si configuré)*
+- **MongoService** : statistiques *(optionnel)*
+
+---
+
+## 9) Sécurité
+
+### Authentification
+- Hash des mots de passe : `password_hash()`
+- Vérification : `password_verify()`
+
+### Autorisations
+- Accès restreint selon le rôle (client / employé / admin)
+- Routes sensibles protégées côté serveur
+
+### Données entrantes / affichage
+- validation des champs reçus (formats, présence, bornes)
+- échappement côté vues (prévention injection HTML)
+
+---
+
+## 10) Tests & validation
+- tests manuels des parcours principaux (visiteur → client → employé → admin)
+- vérification des cas d’erreur :
+  - accès non autorisés
+  - formulaires incomplets / données invalides
+- contrôle des pages sensibles : redirections + messages clairs
+
+---
+
+## 11) Pistes d’évolution
+- enrichissement du back-office (filtres, recherche, pagination)
+- ajout de statistiques par période (CA, panier moyen, menus populaires…)
+- stockage des uploads (si ajout de médias) + CDN
+- automatisation de tests (au minimum sur les services critiques)
