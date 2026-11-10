@@ -6,7 +6,7 @@ declare(strict_types=1);
  * DEBUG
  */
 if (!defined('APP_DEBUG')) {
-    define('APP_DEBUG', true);
+    define('APP_DEBUG', false);
 }
 
 if (APP_DEBUG) {
