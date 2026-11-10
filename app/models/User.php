@@ -1,7 +1,7 @@
 <?php
 // app/Models/User.php
 require_once BASE_PATH . '/app/Core/Route.php';
-require_once BASE_PATH . '/app/Models/Database.php';
+require_once BASE_PATH . '/app/models/Database.php';
 
 class User
 {
