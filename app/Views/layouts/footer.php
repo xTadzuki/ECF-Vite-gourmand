@@ -4,7 +4,7 @@
 require_once BASE_PATH . '/app/Core/Route.php';
 $hours = null;
 try {
-  $dbPath = BASE_PATH . '/app/Models/Database.php';
+  $dbPath = BASE_PATH . '/app/models/Database.php';
   if (file_exists($dbPath)) {
     require_once $dbPath;
     $pdo = Database::getConnection();
