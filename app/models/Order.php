@@ -209,7 +209,7 @@ class Order
 
         $stmt = $pdo->prepare("
         UPDATE orders
-        SET status = 'annulée',
+        SET status = 'annulé',
             cancelled_at = NOW(),
             updated_at = NOW()
         WHERE id = :id AND user_id = :user_id AND status = 'créée'
@@ -220,7 +220,7 @@ class Order
         ]);
 
         if ($stmt->rowCount() > 0) {
-            self::addStatusHistory($orderId, 'annulée');
+            self::addStatusHistory($orderId, 'annulé');
             return true;
         }
 
@@ -303,7 +303,7 @@ class Order
 
         $stmt = $pdo->prepare("
             UPDATE orders
-            SET status = 'annulée',
+            SET status = 'annulé',
                 cancel_contact_mode = :mode,
                 cancel_reason = :reason,
                 cancelled_at = NOW(),
@@ -316,7 +316,7 @@ class Order
             'id'     => $orderId,
         ]);
 
-        self::addStatusHistory($orderId, 'annulée');
+        self::addStatusHistory($orderId, 'annulé');
     }
 
 
