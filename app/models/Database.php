@@ -35,7 +35,6 @@ class Database
                 (int)$e->getCode()
             );
         }
-
         return self::$pdo;
     }
 }
