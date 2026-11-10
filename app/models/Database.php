@@ -28,12 +28,10 @@ class Database
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                 PDO::ATTR_EMULATE_PREPARES   => false,
             ]);
-        } catch (PDOException $e) {
-            // Message clair en prod (sans leak du mot de passe)
-            throw new PDOException(
-                "Connexion BDD impossible (host={$host}, db={$db}). Vérifie DB_HOST/DB_NAME/DB_USER/DB_PASS/DB_PORT. Détail: " . $e->getMessage(),
-                (int)$e->getCode()
-            );
+                } catch (PDOException $e) {
+            // Le détail technique va dans les logs (fly logs), jamais à l'écran
+            error_log('Connexion BDD impossible : ' . $e->getMessage());
+            throw new PDOException('Connexion à la base impossible.');
         }
         return self::$pdo;
     }
