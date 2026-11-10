@@ -1,7 +1,7 @@
 <?php
 // app/Controllers/PasswordController.php
 require_once BASE_PATH . '/app/Core/Route.php';
-require_once BASE_PATH . '/app/Models/User.php';
+require_once BASE_PATH . '/app/models/User.php';
 require_once BASE_PATH . '/app/Services/Mailer.php';
 
 class PasswordController
