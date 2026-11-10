@@ -137,6 +137,5 @@ class OrderController
 }
         require_once BASE_PATH . '/app/Views/orders/create.php';
     }
-}
 
 }
