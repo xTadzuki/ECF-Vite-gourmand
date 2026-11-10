@@ -1,0 +1,10 @@
+# Secrets et configuration locale
+.env
+
+# Journaux générés par l'application
+storage/*.log
+
+# Fichiers système et éditeur
+.DS_Store
+Thumbs.db
+.vscode/
